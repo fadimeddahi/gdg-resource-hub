@@ -11,6 +11,7 @@ dotenv.config({ path: __dirname + '/../.env' });
 
 const connectDB = require('./config/db');
 const resourceRoutes = require('./routes/resourceRoutes');
+const testRoutes = require('./routes/testRoutes');
 const { errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -27,6 +28,7 @@ if (process.env.NODE_ENV === 'development') {
 
 // Routes
 app.use('/api/resources', resourceRoutes);
+app.use('/api/test', testRoutes);
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
