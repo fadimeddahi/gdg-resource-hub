@@ -19,11 +19,14 @@ export const uploadFileToCloudinary = asyncHandler(async (req, res) => {
         {
           folder: "gdg-resources",
           resource_type: "auto", // Automatically detect file type
-          allowed_formats: ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "jpg", "jpeg", "png", "gif", "zip"],
         },
         (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
+          if (error) {
+            console.error("Cloudinary error details:", error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
         }
       );
 
@@ -75,11 +78,14 @@ export const createCollectionUploadController = (Model) => {
           {
             folder: "gdg-resources",
             resource_type: "auto",
-            allowed_formats: ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "jpg", "jpeg", "png", "gif", "zip"],
           },
           (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
+            if (error) {
+              console.error("Cloudinary error details:", error);
+              reject(error);
+            } else {
+              resolve(result);
+            }
           }
         );
 

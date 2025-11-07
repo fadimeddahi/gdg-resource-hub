@@ -24,25 +24,14 @@ export const uploadFile = asyncHandler(async (req, res) => {
         {
           resource_type: "auto",
           folder: "gdg-resources",
-          allowed_formats: [
-            "jpg",
-            "jpeg",
-            "png",
-            "gif",
-            "pdf",
-            "doc",
-            "docx",
-            "xls",
-            "xlsx",
-            "ppt",
-            "pptx",
-            "txt",
-            "zip",
-          ],
         },
         (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
+          if (error) {
+            console.error("Cloudinary upload error:", error);
+            reject(error);
+          } else {
+            resolve(result);
+          }
         }
       )
       .end(fileBuffer);
@@ -80,24 +69,10 @@ export const uploadMultipleFiles = asyncHandler(async (req, res) => {
           {
             resource_type: "auto",
             folder: "gdg-resources",
-            allowed_formats: [
-              "jpg",
-              "jpeg",
-              "png",
-              "gif",
-              "pdf",
-              "doc",
-              "docx",
-              "xls",
-              "xlsx",
-              "ppt",
-              "pptx",
-              "txt",
-              "zip",
-            ],
           },
           (error, result) => {
             if (error) {
+              console.error("Cloudinary upload error:", error);
               reject(error);
             } else {
               resolve({
