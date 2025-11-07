@@ -25,6 +25,7 @@ import projectRoutes from "./routes/projectRoutes.js";
 import guideRoutes from "./routes/guideRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import templateRoutes from "./routes/templateRoutes.js";
+import savedFolderRoutes from "./routes/savedFolderRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 
 // ============================================
@@ -126,6 +127,7 @@ app.use("/api/v1/projects", projectRoutes);
 app.use("/api/v1/guides", guideRoutes);
 app.use("/api/v1/events", eventRoutes);
 app.use("/api/v1/templates", templateRoutes);
+app.use("/api/v1/saved-folders", savedFolderRoutes);
 
 // Backwards compatibility (optional - remove after migration)
 app.use("/api/resources", resourceRoutes);

@@ -13,6 +13,15 @@ const templateSchema = new mongoose.Schema(
       trim: true,
       maxlength: [200, "Title cannot exceed 200 characters"],
     },
+    fileUrl: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    views: {
+      type: Number,
+      default: 0,
+    },
     isActive: {
       type: Boolean,
       default: true,

@@ -159,6 +159,52 @@ export const createCollectionController = (Model) => {
         message: "Item deleted successfully",
       });
     }),
+
+    // INCREMENT VIEWS
+    incrementViews: asyncHandler(async (req, res) => {
+      const { id } = req.params;
+
+      const item = await Model.findByIdAndUpdate(
+        id,
+        { $inc: { views: 1 } },
+        { new: true }
+      ).populate("department", "name slug");
+
+      if (!item) {
+        res.status(404);
+        throw new Error("Item not found");
+      }
+
+      res.status(200).json({
+        success: true,
+        data: item,
+      });
+    }),
+
+    // GET FILE URL
+    getFileUrl: asyncHandler(async (req, res) => {
+      const { id } = req.params;
+
+      const item = await Model.findById(id).select("fileUrl title");
+
+      if (!item) {
+        res.status(404);
+        throw new Error("Item not found");
+      }
+
+      if (!item.fileUrl) {
+        res.status(404);
+        throw new Error("No file attached to this item");
+      }
+
+      res.status(200).json({
+        success: true,
+        data: {
+          fileUrl: item.fileUrl,
+          title: item.title,
+        },
+      });
+    }),
   };
 };
 
