@@ -5,13 +5,13 @@ import mongoose from "mongoose";
 
 const connectDB = async () => {
   const mongoUri = process.env.MONGO_URI;
+  console.log(mongoUri)
   
   if (!mongoUri) {
     console.error("❌ MONGO_URI not set in environment");
     process.exit(1);
   }
 
-  try {
     // Mongoose 6+ doesn't need useNewUrlParser and useUnifiedTopology
     const conn = await mongoose.connect(mongoUri);
 
@@ -30,17 +30,6 @@ const connectDB = async () => {
       console.log("📴 Mongoose disconnected");
     });
 
-    // Graceful shutdown on process termination
-    process.on("SIGINT", async () => {
-      await mongoose.connection.close();
-      console.log("🔌 MongoDB connection closed through app termination");
-      process.exit(0);
-    });
-
-  } catch (err) {
-    console.error(`❌ MongoDB connection error: ${err.message}`);
-    process.exit(1);
-  }
 };
 
 export default connectDB;

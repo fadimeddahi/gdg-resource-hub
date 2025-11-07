@@ -1,18 +1,19 @@
 import User from "../models/User.js";
+import Department from "../models/Department.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { generateToken } from "../utils/tokenGenerator.js";
 
 /**
  * @route POST /api/v1/auth/register
- * @desc Register new user (default role = visitor)
+ * @desc Register new user with optional department selection
  * @access Public
  */
 export const register = asyncHandler(async (req, res) => {
-  const { name, email, password, department } = req.body;
+  const { email, password, departmentId } = req.body;
 
-  if (!name || !email || !password) {
+  if (!email || !password) {
     res.status(400);
-    throw new Error("Name, email, and password are required");
+    throw new Error("Email and password are required");
   }
 
   const existing = await User.findOne({ email: email.toLowerCase() });
@@ -21,13 +22,32 @@ export const register = asyncHandler(async (req, res) => {
     throw new Error("User with this email already exists");
   }
 
+  // Generate default name from email
+  const nameFromEmail = email.split('@')[0];
+  const defaultName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
+
+  // Handle department if provided (accepts slug or ObjectId)
+  let departmentObjectId = null;
+  if (departmentId) {
+    const department = await Department.findOne({ 
+      $or: [
+        { slug: departmentId },
+        { _id: departmentId }
+      ]
+    });
+    
+    if (department) {
+      departmentObjectId = department._id;
+    }
+  }
+
   // Default role: visitor (self-registration)
   const user = await User.create({
-    name: name.trim(),
+    name: defaultName,
     email: email.toLowerCase(),
     password,
     role: "visitor",
-    department: department || null,
+    department: departmentObjectId,
   });
 
   user.lastLogin = new Date();
@@ -36,11 +56,16 @@ export const register = asyncHandler(async (req, res) => {
   // Generate token including role
   const token = generateToken(user._id, user.role);
 
+  // Populate department for response (without icon and color)
+  const populatedUser = await User.findById(user._id)
+    .select("-password")
+    .populate("department", "name slug");
+
   res.status(201).json({
     success: true,
     message: "User registered successfully as a Visitor",
     data: {
-      user: await User.findById(user._id).select("-password"),
+      user: populatedUser,
       token,
     },
   });

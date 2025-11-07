@@ -21,6 +21,10 @@ import userRoutes from "./routes/userRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import folderRoutes from "./routes/folderRoutes.js";
+import projectRoutes from "./routes/projectRoutes.js";
+import guideRoutes from "./routes/guideRoutes.js";
+import eventRoutes from "./routes/eventRoutes.js";
+import templateRoutes from "./routes/templateRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 
 // ============================================
@@ -47,7 +51,6 @@ const NODE_ENV = process.env.NODE_ENV || "development";
 // ============================================
 // DATABASE CONNECTION
 // ============================================
-connectDB();
 
 // ============================================
 // SECURITY MIDDLEWARE
@@ -81,9 +84,19 @@ app.use(hpp());
 
 // Enable CORS
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173', // Vite default port
+    'http://localhost:5174', // Alternative Vite port
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:3000'
+  ],
   credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
+
 app.use(cors(corsOptions));
 
 // Body parser
@@ -109,13 +122,17 @@ app.use("/api/v1/resources", resourceRoutes);
 app.use("/api/v1/departments", departmentRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/upload", uploadRoutes);
+app.use("/api/v1/projects", projectRoutes);
+app.use("/api/v1/guides", guideRoutes);
+app.use("/api/v1/events", eventRoutes);
+app.use("/api/v1/templates", templateRoutes);
 
 // Backwards compatibility (optional - remove after migration)
 app.use("/api/resources", resourceRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/upload", uploadRoutes);
-app.use("/api/folders", folderRoutes);  
+app.use("/api/folders", folderRoutes);
 
 
 // ...
@@ -168,46 +185,80 @@ app.use(errorHandler);
 // START SERVER
 // ============================================
 
-const server = app.listen(PORT, () => {
-  console.log(`
-╔════════════════════════════════════════════╗
-║   🚀 GDG Resource Hub API Server          ║
-╠════════════════════════════════════════════╣
-║   Environment: ${NODE_ENV.padEnd(27)}║
-║   Port:        ${PORT.toString().padEnd(27)}║
-║   Status:      Running ✅                  ║
-╚════════════════════════════════════════════╝
-  `);
-});
+// Initialize departments helper function
+const initializeDepartments = async () => {
+  const Department = (await import("./models/Department.js")).default;
+  
+  const departments = [
+    { slug: "design", name: "Design" },
+    { slug: "dev", name: "Development" },
+    { slug: "comm", name: "Communication" },
+    { slug: "hr", name: "Human Resources" },
+    { slug: "logistics", name: "Logistics" },
+    { slug: "multimedia", name: "Multimedia" },
+    { slug: "external", name: "External Relations" },
+  ];
 
-// ============================================
-// GRACEFUL SHUTDOWN
-// ============================================
+  for (const dept of departments) {
+    const existing = await Department.findOne({ slug: dept.slug });
+    if (!existing) {
+      await Department.create(dept);
+      console.log(`✅ Created department: ${dept.name}`);
+    }
+  }
+};
 
-// Handle unhandled promise rejections
-process.on("unhandledRejection", (err) => {
-  console.error("❌ UNHANDLED REJECTION! Shutting down...");
-  console.error(err.name, err.message);
-  server.close(() => {
+const start = async () => {
+  try {
+    await connectDB();
+    
+    // Initialize departments if they don't exist
+    const Department = (await import("./models/Department.js")).default;
+    const deptCount = await Department.countDocuments();
+    if (deptCount === 0) {
+      console.log("📋 Initializing departments...");
+      await initializeDepartments();
+      console.log("✅ Departments initialized");
+    }
+    
+    const server = app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT} in ${NODE_ENV} mode`);
+    });
+
+    // ============================================
+    // GRACEFUL SHUTDOWN
+    // ============================================
+
+    // Handle unhandled promise rejections
+    process.on("unhandledRejection", (err) => {
+      console.error("❌ UNHANDLED REJECTION! Shutting down...");
+      console.error(err.name, err.message);
+      server.close(() => {
+        process.exit(1);
+      });
+    });
+
+    // Handle SIGTERM (e.g., from Heroku, Docker)
+    process.on("SIGTERM", () => {
+      console.log("👋 SIGTERM received. Shutting down gracefully...");
+      server.close(() => {
+        console.log("✅ Process terminated");
+      });
+    });
+
+    // Handle SIGINT (Ctrl+C)
+    process.on("SIGINT", () => {
+      console.log("\n👋 SIGINT received. Shutting down gracefully...");
+      server.close(() => {
+        console.log("✅ Process terminated");
+        process.exit(0);
+      });
+    });
+  } catch (error) {
+    console.error("❌ Server startup error:", error);
     process.exit(1);
-  });
-});
-
-// Handle SIGTERM (e.g., from Heroku, Docker)
-process.on("SIGTERM", () => {
-  console.log("👋 SIGTERM received. Shutting down gracefully...");
-  server.close(() => {
-    console.log("✅ Process terminated");
-  });
-});
-
-// Handle SIGINT (Ctrl+C)
-process.on("SIGINT", () => {
-  console.log("\n👋 SIGINT received. Shutting down gracefully...");
-  server.close(() => {
-    console.log("✅ Process terminated");
-    process.exit(0);
-  });
-});
+  }
+};
+start();
 
 export default app;

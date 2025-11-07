@@ -71,7 +71,9 @@ export const getDepartments = asyncHandler(async (req, res) => {
     query.$text = { $search: search };
   }
 
-  const departments = await Department.find(query).sort({ name: 1 });
+  const departments = await Department.find(query)
+    .select('name slug description resourceCount folderCount isActive createdAt updatedAt')
+    .sort({ name: 1 });
 
   res.status(200).json({
     success: true,
@@ -91,9 +93,11 @@ export const getDepartment = asyncHandler(async (req, res) => {
 
   // Try to find by ObjectId first, then by slug
   if (mongoose.Types.ObjectId.isValid(id)) {
-    department = await Department.findById(id);
+    department = await Department.findById(id)
+      .select('name slug description resourceCount folderCount isActive createdAt updatedAt');
   } else {
-    department = await Department.findOne({ slug: id });
+    department = await Department.findOne({ slug: id })
+      .select('name slug description resourceCount folderCount isActive createdAt updatedAt');
   }
 
   if (!department || !department.isActive) {

@@ -48,7 +48,7 @@ const departmentSchema = new mongoose.Schema(
 
 // ✅ Auto-generate slug from name if not provided
 departmentSchema.pre("save", function (next) {
-  if (this.isModified("name")) {
+  if (!this.slug && this.isModified("name")) {
     this.slug = this.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
