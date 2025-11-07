@@ -1,4 +1,4 @@
-import Folder from "../models/Folder.js";
+import Folder from "../models/folder.js";
 import Resource from "../models/Resource.js";
 import Department from "../models/Department.js";
 import mongoose from "mongoose";
