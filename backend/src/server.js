@@ -84,25 +84,10 @@ app.use(hpp());
 // ============================================
 
 // Enable CORS
-// Allow configuring allowed origins via the CORS_ORIGIN env var (comma-separated)
-const defaultOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173', // Vite default port
-  'http://localhost:5174', // Alternative Vite port
-  'http://127.0.0.1:5173',
-  'http://127.0.0.1:3000',
-];
-
-const corsOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',').map((s) => s.trim()).filter(Boolean)
-  : defaultOrigins;
-
 const corsOptions = {
-  origin: corsOrigins,
+  origin: "*",
   credentials: true,
   optionsSuccessStatus: 200,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
 };
 
 app.use(cors(corsOptions));
