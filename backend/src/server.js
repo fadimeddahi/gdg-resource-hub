@@ -91,7 +91,7 @@ const corsOptions = {
     'http://localhost:5174',
     'http://127.0.0.1:5173',
     'http://127.0.0.1:3000',
-    'https://gdg-library-frontend-a1faa-7u7xmevea-fadis-projects-b3c79d88.vercel.app'
+    'https://gdg-library-frontendd.vercel.app'
   ],
   credentials: true,
   optionsSuccessStatus: 200,
