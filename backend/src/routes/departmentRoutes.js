@@ -18,6 +18,7 @@ const router = express.Router();
 
 // 📘 Public / Authorized: All roles can view departments
 router.get("/",  getDepartments);
+router.get("/slug/:slug", getDepartment);  // Public slug lookup
 router.get("/:id", getDepartment);
 router.get("/:id/stats", protect, restrictTo("visitor", "member", "co-manager"), getDepartmentStats);
 
