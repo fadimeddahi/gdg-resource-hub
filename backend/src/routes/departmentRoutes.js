@@ -18,7 +18,7 @@ const router = express.Router();
 
 // 📘 Public / Authorized: All roles can view departments
 router.get("/",  getDepartments);
-router.get("/:id", protect, restrictTo("visitor", "member", "co-manager"), getDepartment);
+router.get("/:id", getDepartment);
 router.get("/:id/stats", protect, restrictTo("visitor", "member", "co-manager"), getDepartmentStats);
 
 // 🏗️ Co-Manager only: Create, Update, Delete
